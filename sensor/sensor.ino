@@ -1,4 +1,6 @@
 #include <WiFi.h>
+#include <HttpClient.h>
+#include "estruturas.h"
 
 //Configuracoes:
 #define CFG_WIFI_NOME_REDE                "MEO-C17F40-EXT"
@@ -8,10 +10,9 @@
 #define CFG_DEBUG_BAUDRATE                115200
 #define CFG_BUFFER_SIZE                   1024
 
-#define CFG_SERVICE_ADDRESS               "http://localhost:8000/amostras/"
+#define CFG_SERVICE_ADDRESS               "127.0.0.1"
+#define CFG_SERVICE_ADDRESS_PORT          8000
 #define CFG_DATABASE_ID_RELOGIO           1
-
-#define CFG_TAXA_AMOSTRAGEM_SENSORES_MS   1000
 
 
 /*
@@ -67,23 +68,18 @@ void wifi_main(){
 /*
   Estruturas de dados dos sensores
 */
-typedef struct amostra_t{
-  char* nomeSensor;
-  float valor;
-  char* unidade;
-  bool lido;
-}amostra;
+
 amostra sensores[] = {
   {
     "Frequencia Cardiaca",
     0.0,
-    "bps"
+    "bps",
     false
   },
   {
     "Oxigenio no Sangue",
     0.0,
-    "%"
+    "%",
     false
   },
   {
@@ -104,29 +100,30 @@ amostra sensores[] = {
     "N",
     false
   }
-}
+};
 
 char* amostra_to_json(amostra* m,char* buff){
-  sprintf(buff,"
-  {
-    \"sensor\": %d,
-    \"unidade\": \"%s\",
-    \"valor\": %f
-  }
+  sprintf(buff,"                      \
+  {                                   \
+    \"sensor\": %d,                   \
+    \"unidade\": \"%s\",              \
+    \"valor\": %.3f                   \
+  }                                   \
   ", CFG_DATABASE_ID_RELOGIO, m->unidade, m->valor);
   return buff;
 }
 
 void amostra_post(char* httpRequestData){
-  HTTPClient http;
+  WiFiClient wifi;
+  HttpClient http = HttpClient(wifi, CFG_SERVICE_ADDRESS, CFG_SERVICE_ADDRESS_PORT);
   char* serverPath = CFG_SERVICE_ADDRESS;
-  http.begin(serverPath);
-  http.addHeader("Content-Type", "application/json");
-  int httpResponseCode = http.POST(httpRequestData);
+  char* header = "application/json";
+  http.post("/amostras/",header,httpRequestData);
+  int httpResponseCode = http.responseStatusCode();
   if(httpResponseCode != 200){
     debug_print("Erro de ligacao");
   }
-  http.end();
+
 }
 
 void amostra_main(){
@@ -138,24 +135,18 @@ void amostra_main(){
 
   for(i=0;i< sizeof(sensores) / sizeof(sensores[0]); i++){
       if(sensores[i].lido == true){
-        amostra_post(amostra_to_json(sensores[i],buffer));
+        amostra_post(amostra_to_json(&sensores[i],buffer));
         sensores[i].lido = false;
       }
   }
 
 }
 
-typedef struct tarefa_t{
-  long int t_inicio_ms;
-  long int t_perido_ms
-  void(*f)(void) t;
-}tarefa;
+
 
 void sensor_freq_cardiaca_main(){
-  //leu-se 50
   sensores[0].valor = sensores[0].valor + 1;
   sensores[0].lido = true;
-
 }
 
 
@@ -164,13 +155,13 @@ tarefa tarefas[] = {
   { 0,      500,    wifi_main                   },
   { 0,      500,    amostra_main                },
   { 0,      1000,   sensor_freq_cardiaca_main   }
-}
+};
 
 
 
-void tarefas_main(){
+void tarefas_main() {
   int i;
-  for(i=0;i<sizeof(tarefas) / sizeof(tarefas[0]), i++){
+  for(i=0;i<sizeof(tarefas) / sizeof(tarefas[0]); i++){
       if(millis() - tarefas[i].t_inicio_ms >= tarefas[i].t_periodo_ms){
         tarefas[i].t();
         tarefas[i].t_inicio_ms = millis();
