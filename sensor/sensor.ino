@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <HttpClient.h>
 #include "estruturas.h"
+#include "acelerometro.h"
+#include "relogio.h"
 
 //Configuracoes:
 #define CFG_WIFI_NOME_REDE                "MEO-C17F40-EXT"
@@ -70,36 +72,18 @@ void wifi_main(){
 */
 
 amostra sensores[] = {
-  {
-    "Frequencia Cardiaca",
-    0.0,
-    "bps",
-    false
-  },
-  {
-    "Oxigenio no Sangue",
-    0.0,
-    "%",
-    false
-  },
-  {
-    "Pressao arterial min",
-    0.0,
-    "bps",
-    false
-  },
-  {
-    "Pressao arterial max",
-    0.0,
-    "bps",
-    false
-  },
-  {
-    "Detetor Quedas",
-    0.0,
-    "N",
-    false
-  }
+  /*Aceletremotro 0-6 | tamanho - 7 */
+  {"girX" ,       0.0,  "º",      false },
+  {"girY" ,       0.0,  "º",      false },
+  {"girZ" ,       0.0,  "º",      false },
+  {"acelX",       0.0,  "m/s",    false },
+  {"acelY",       0.0,  "m/s",    false },
+  {"acelZ",       0.0,  "m/s",    false },
+  {"temperatura", 0.0,  "C",      false },
+
+  /*Relogio 7-8 | tamanho - 2 */
+  {"bpm",         0.0,  "bpm",    false },
+  {"spo2",        0.0,  "spo2",   false }
 };
 
 char* amostra_to_json(amostra* m,char* buff){
@@ -142,22 +126,13 @@ void amostra_main(){
 
 }
 
-
-
-void sensor_freq_cardiaca_main(){
-  sensores[0].valor = sensores[0].valor + 1;
-  sensores[0].lido = true;
-}
-
-
 tarefa tarefas[] = {
-// t        periodo Funcao
-  { 0,      500,    wifi_main                   },
-  { 0,      500,    amostra_main                },
-  { 0,      1000,   sensor_freq_cardiaca_main   }
+  // t     periodo    Funcao
+  { 0,      500,      wifi_main                   },
+  { 0,      500,      amostra_main                },
+  { 0,      200,      acelerometro_main           },
+  { 0,      1000,     relogio_main                }
 };
-
-
 
 void tarefas_main() {
   int i;
@@ -170,6 +145,9 @@ void tarefas_main() {
 }
 void setup() {
   wifi_init();
+
+  acelerometro_init(&sensores[0]);
+  relogio_init(&sensores[7]);
 }
 
 void loop() {

@@ -76,19 +76,19 @@ WSGI_APPLICATION = 'bioalert.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'local': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'bioalert',
         'USER': 'postgres',
         'PASSWORD': 'Pa8Mr9D6zzAl',
         'HOST': 'vsgate-s1.dei.isep.ipp.pt',
         'PORT': '10488' 
-    }
+    },
     
-    #'local': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': BASE_DIR / 'db.sqlite3',
-    #}
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 

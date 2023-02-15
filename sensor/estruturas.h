@@ -1,6 +1,6 @@
 #ifndef ESTRUTURAS_H
 #define ESTRUTURAS_H
-
+#include <stdbool.h>
 struct amostra{
   char* nomeSensor;
   float valor;
