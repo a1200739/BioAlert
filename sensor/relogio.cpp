@@ -1,7 +1,7 @@
 #include "relogio.h"
 #include <Wire.h>
 #include <MAX30100_PulseOximeter.h>
-#include "RTClib.h"            //biblioteca para RTC module
+#include <RTClib.h>            //biblioteca para RTC module
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -44,10 +44,10 @@ void onBeatDetected1()
   heart_beat(&xPos1);
 }
 
-amostra* env;
+amostra* rel_env;
 
 void relogio_init(amostra* x){
-    env = x;
+    rel_env = x;
     if(!display.begin(SSD1306_SWITCHCAPVCC,0x3C))
     {
         Serial.println(F("SSD1306 allocation failed"));
@@ -110,9 +110,9 @@ void getbpm_spO2()
   if(millis() - tsLastReport > REPORTING_PERIOD_MS){
     //Serial.print("Heart rate:");
     bpm = pox.getHeartRate();
-    env[0].valor = bpm; env[0].lido = true;
+    rel_env[0].valor = bpm; rel_env[0].lido = true;
     spo2 = pox.getSpO2();
-    env[1].valor = spo2; env[1].lido = true;
+    rel_env[1].valor = spo2; rel_env[1].lido = true;
     //todo:
     //Serial.print(bpm);
     tsLastReport = millis();

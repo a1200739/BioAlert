@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <HttpClient.h>
+
 #include "estruturas.h"
 #include "acelerometro.h"
 #include "relogio.h"
@@ -83,7 +84,11 @@ amostra sensores[] = {
 
   /*Relogio 7-8 | tamanho - 2 */
   {"bpm",         0.0,  "bpm",    false },
-  {"spo2",        0.0,  "spo2",   false }
+  {"spo2",        0.0,  "spo2",   false },
+
+  /* Simuladores 9-10 | tamanho 2  */
+  {"sim1",        0.0,   "sim1",   false },
+  {"sim2",        0.0,   "sim2",   false }
 };
 
 char* amostra_to_json(amostra* m,char* buff){
@@ -126,12 +131,25 @@ void amostra_main(){
 
 }
 
+amostra* simula_sensor;
+void simula_sensor_init(amostra* a){
+  simula_sensor = a;
+}
+
+void simula_sensor_main(){
+  simula_sensor[0].lido = simula_sensor[0].lido+1;
+  simula_sensor[0].lido = true;
+  simula_sensor[1].lido = simula_sensor[1].lido+1;
+  simula_sensor[1].lido = true;
+}
+
 tarefa tarefas[] = {
   // t     periodo    Funcao
   { 0,      500,      wifi_main                   },
   { 0,      500,      amostra_main                },
-  { 0,      200,      acelerometro_main           },
-  { 0,      1000,     relogio_main                }
+  { 0,      1000,     simula_sensor_main          },
+//  { 0,      200,      acelerometro_main           },
+//  { 0,      1000,     relogio_main                }
 };
 
 void tarefas_main() {
@@ -146,8 +164,9 @@ void tarefas_main() {
 void setup() {
   wifi_init();
 
-  acelerometro_init(&sensores[0]);
-  relogio_init(&sensores[7]);
+  //acelerometro_init(&sensores[0]);
+  //relogio_init(&sensores[7]);
+  simula_sensor_init(&sensores[9]);
 }
 
 void loop() {

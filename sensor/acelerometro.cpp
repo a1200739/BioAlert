@@ -6,7 +6,7 @@
 const int ENDERECO_SENSOR = 0x68;
 
 int girX, girY, girZ, acelX, acelY, acelZ, temperatura;
-amostra * env;
+amostra * acc_env;
 
 void acelerometro_init(amostra* x){
     //Inicializa a biblioteca Wire
@@ -18,17 +18,17 @@ void acelerometro_init(amostra* x){
     Wire.write(0);
     Wire.endTransmission(true);
 
-    env = x;
+    acc_env = x;
 }
 
-void amostra_enviar(){
-    env[0].valor = girX; env[0].lido = true;
-    env[1].valor = girY; env[1].lido = true;
-    env[2].valor = girZ; env[2].lido = true;
-    env[3].valor = acelX; env[3].lido = true;
-    env[4].valor = acelY; env[4].lido = true;
-    env[5].valor = acelZ; env[5].lido = true;
-    env[6].valor = temperatura; env[6].lido = true;
+void amostra_acc_enviar(){
+    acc_env[0].valor = girX; acc_env[0].lido = true;
+    acc_env[1].valor = girY; acc_env[1].lido = true;
+    acc_env[2].valor = girZ; acc_env[2].lido = true;
+    acc_env[3].valor = acelX; acc_env[3].lido = true;
+    acc_env[4].valor = acelY; acc_env[4].lido = true;
+    acc_env[5].valor = acelZ; acc_env[5].lido = true;
+    acc_env[6].valor = temperatura; acc_env[6].lido = true;
 }
 
 void acelerometro_main(){
@@ -52,5 +52,5 @@ void acelerometro_main(){
     girY = Wire.read() << 8| Wire.read();    //0×45 (GYRO_YOUT_H) & 0×46 (GYRO_YOUT_L)
     girZ = Wire.read() << 8| Wire.read();    //0×47 (GYRO_ZOUT_H) & 0×48 (GYRO_ZOUT_L)
 
-    amostra_enviar();
+    amostra_acc_enviar();
 }
